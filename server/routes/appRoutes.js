@@ -7,6 +7,7 @@ router.get("/health", appController.health)
 router.post("/login", appController.login)
 router.get("/logout",authorization.authorization, appController.logout)
 router.post("/register", appController.register)
+router.post("/auth/google", appController.googleAuth)
 router.get("/user",authorization.authorization, appController.userDetails)
 
 

@@ -75,6 +75,28 @@ const register = async (req, res) => {
     }
 }
 
+const googleAuth = async (req, res) => {
+    try {
+        const {email, googleId} = req.body
+        const checkUserExists  = await User.findOne({email:email})
+        if(!checkUserExists){
+            const user = new User({
+                email,
+                googleId
+            })
+            await user.save()
+            checkUserExists = user
+        }
+        const token = jwt.sign({ id: checkUserExists._id , email: checkUserExists.email}, process.env.JWT_SECRET, { expiresIn: '1d' })
+
+        return res.cookie("access_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "Production",
+            }).status(200).json({ message: "Logged in successfully " });    
+    } catch (error) {
+        errorHandler.errorHandler(error, res)
+    }
+}
 
 const userDetails = async (req, res) => {
     try{
@@ -87,6 +109,6 @@ const userDetails = async (req, res) => {
 }
 
 module.exports = {
-    health,login,logout,register,userDetails
+    health,login,logout,register,userDetails,googleAuth
 
 }
