@@ -1,7 +1,8 @@
-const errorHandler = require("../middlewares/ErrorHandler")
-const User = require("../models/UserModel")
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcrypt")
+import User from "../models/UserModel.js"
+import errorHandler from "../middlewares/ErrorHandler.js"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+import fetch from "node-fetch"
 
 
 const health = async (req, res) => {
@@ -75,6 +76,7 @@ const register = async (req, res) => {
     }
 }
 
+// google auth
 const googleAuth = async (req, res) => {
     try {
         const {email, googleId} = req.body
@@ -98,6 +100,43 @@ const googleAuth = async (req, res) => {
     }
 }
 
+// github auth
+const githubAuth = async (req, res) => {
+    try {
+        const { code } = req.body;
+        // Exchange code for access token
+        const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                client_id: GITHUB_CLIENT_ID,
+                client_secret: GITHUB_CLIENT_SECRET,
+                code,
+            }),
+        });
+
+        const tokenData = await tokenResponse.json();
+        const accessToken = tokenData.access_token;
+
+        if (accessToken) {
+            console.log(tokenData);
+            res.cookie("access_token", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "Production",
+            }).status(200).json({ message: "Logged in successfully " });
+        } else {
+            res.status(401).json({ message: "Failed to get access token" });
+        }
+    }
+    catch (error) {
+        errorHandler.errorHandler(error, res)
+    }
+}
+
+
 const userDetails = async (req, res) => {
     try{
         return res.status(200).json({
@@ -108,7 +147,6 @@ const userDetails = async (req, res) => {
     }
 }
 
-module.exports = {
-    health,login,logout,register,userDetails,googleAuth
-
+export{
+    health,login,logout,register,userDetails,googleAuth, githubAuth
 }

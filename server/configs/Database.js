@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
+import { connect } from 'mongoose';
 
 // Connect to MongoDB
 const connectToMongoDB = async () => {
   try {
     console.log(process.env.NODE_ENV )
     if(process.env.NODE_ENV  === 'Development'){
-      await mongoose.connect(process.env.MONGODB_HOST_DEV);
+      await connect(process.env.MONGODB_HOST_DEV);
     }
     else if (process.env.NODE_ENV  === 'Production'){
-      await mongoose.connect(process.env.MONGODB_HOST_PROD);
+      await connect(process.env.MONGODB_HOST_PROD);
     }
     console.log('MongoDB Connected');
   } catch (error) {
@@ -16,4 +16,4 @@ const connectToMongoDB = async () => {
   }
 };
 
-module.exports = connectToMongoDB;
+export default connectToMongoDB;

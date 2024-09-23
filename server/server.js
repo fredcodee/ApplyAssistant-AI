@@ -1,20 +1,19 @@
-require('dotenv').config();
-const express = require('express')
-const cookieParser = require("cookie-parser");
-const cors =  require('cors')
-const appRoutes = require('./routes/appRoutes')
-const connectToMongoDB = require('./configs/Database')
-const bodyParser = require('body-parser');
-const allowedOrigins = require('./configs/AllowedOriginUrls')
+import dotenv from 'dotenv'
+dotenv.config()
+import express, { json } from 'express';
+import cookieParser from "cookie-parser";
+import cors from 'cors';
+import appRoutes from './routes/appRoutes.js';
+import connectToMongoDB from './configs/Database.js';
+import allowedOrigins from './configs/AllowedOriginUrls.js';
 
 
 //connect to db
 connectToMongoDB()
 
 const app = express()
-app.use(bodyParser.urlencoded({extended:true}));
 app.use(cookieParser());
-app.use(express.json())
+app.use(json())
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors({origin: allowedOrigins, credentials: true }));
@@ -24,4 +23,4 @@ app.listen(process.env.PORT,()=>{
     console.log("server is up on port: " + process.env.PORT)
 })
 
-module.exports = app;
+export default app;

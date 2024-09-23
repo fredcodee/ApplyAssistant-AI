@@ -1,15 +1,17 @@
-const router = require('express').Router()
-const authorization = require('../middlewares/Auth')
-const appController = require('../controllers/AppController')
+import { Router } from 'express';
+import authorization from '../middlewares/Auth.js'
+import * as AppController from '../controllers/AppController.js'
+
+const router = Router();
+
+router.get("/health", AppController.health)
+router.post("/login", AppController.login)
+router.get("/logout",authorization, AppController.logout)
+router.post("/register", AppController.register)
+router.post("/auth/google", AppController.googleAuth)
+router.get("/user",authorization, AppController.userDetails)
+router.post('/auth/github', AppController.githubAuth)
 
 
-router.get("/health", appController.health)
-router.post("/login", appController.login)
-router.get("/logout",authorization.authorization, appController.logout)
-router.post("/register", appController.register)
-router.post("/auth/google", appController.googleAuth)
-router.get("/user",authorization.authorization, appController.userDetails)
 
-
-
-module.exports = router
+export default router

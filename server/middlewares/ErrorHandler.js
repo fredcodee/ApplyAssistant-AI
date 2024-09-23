@@ -7,4 +7,4 @@ function errorHandler(error, res) {
     })
 }
 
-module.exports = {errorHandler }
+export default {errorHandler }

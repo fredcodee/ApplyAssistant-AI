@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken';
 
   const authorization = async (req, res, next) => {
     try {
@@ -16,4 +16,4 @@ const jwt = require('jsonwebtoken')
 }
 
 
-module.exports ={ authorization}
+export default authorization;

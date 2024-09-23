@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import HomePage from './pages/Homepage'
 import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
+import GithubLogin from './pages/GithubLogin';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/signin" element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/auth/github/callback" element={<GithubLogin />} />
         </Routes>
         </AuthProvider>
       </BrowserRouter>
