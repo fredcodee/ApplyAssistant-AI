@@ -35,20 +35,12 @@ const login = async (req, res) => {
             })
         }   
 
-        const token = jwt.sign({ id: user._id , email: user.email}, process.env.JWT_SECRET, { expiresIn: '1d' })
-        return res.cookie("access_token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "Production",
-            }).status(200).json({ message: "Logged in successfully " });
+        const token = jwt.sign({ id: user._id , email: user.email}, process.env.JWT_SECRET, { expiresIn: '7d' })
+        return res.status(200).json({token: token, message: "Logged in successfully " });
     }
     catch(error){
         return errorHandler(error, res)
     }
-}
-
-
-const logout = async (req, res) => {
-    return res.clearCookie("access_token").status(200).json({ message: "Logged out successfully " });
 }
 
 
@@ -80,7 +72,7 @@ const register = async (req, res) => {
 const googleAuth = async (req, res) => {
     try {
         const {email, googleId} = req.body
-        const checkUserExists  = await User.findOne({email:email})
+        let checkUserExists  = await User.findOne({email:email, googleId:googleId})
         if(!checkUserExists){
             const user = new User({
                 email,
@@ -89,12 +81,8 @@ const googleAuth = async (req, res) => {
             await user.save()
             checkUserExists = user
         }
-        const token = jwt.sign({ id: checkUserExists._id , email: checkUserExists.email}, process.env.JWT_SECRET, { expiresIn: '1d' })
-
-        return res.cookie("access_token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "Production",
-            }).status(200).json({ message: "Logged in successfully " });    
+        const token = jwt.sign({ id: checkUserExists._id , email: checkUserExists.email}, process.env.JWT_SECRET, { expiresIn: '7d' })
+        return res.status(200).json({ token: token, message: "Logged in successfully " });    
     } catch (error) {
         errorHandler.errorHandler(error, res)
     }
@@ -112,8 +100,8 @@ const githubAuth = async (req, res) => {
                 'Accept': 'application/json',
             },
             body: JSON.stringify({
-                client_id: GITHUB_CLIENT_ID,
-                client_secret: GITHUB_CLIENT_SECRET,
+                client_id: process.env.GITHUB_CLIENT_ID,
+                client_secret: process.env.GITHUB_CLIENT_SECRET,
                 code,
             }),
         });
@@ -122,13 +110,26 @@ const githubAuth = async (req, res) => {
         const accessToken = tokenData.access_token;
 
         if (accessToken) {
-            console.log(tokenData);
-            res.cookie("access_token", accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "Production",
-            }).status(200).json({ message: "Logged in successfully " });
+            // Get user data and save to db or get user details
+            const userResponse = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            const userData = await userResponse.json();
+            let user = await User.findOne({ email: userData.email, githubId: userData.id });
+            if (!user) {
+                const newUser = new User({
+                    email: userData.email,
+                    githubId: userData.id,
+                });
+                await newUser.save();
+                user = newUser;
+            }
+            const token = jwt.sign({ id: user._id , email: user.email}, process.env.JWT_SECRET, { expiresIn: '7d' })
+            return res.status(200).json({token: token, message: "Logged in successfully " });
         } else {
-            res.status(401).json({ message: "Failed to get access token" });
+            return res.status(401).json({ message: "Failed to login with github" });
         }
     }
     catch (error) {
@@ -147,6 +148,8 @@ const userDetails = async (req, res) => {
     }
 }
 
+
+
 export{
-    health,login,logout,register,userDetails,googleAuth, githubAuth
+    health,login,register,userDetails,googleAuth, githubAuth
 }

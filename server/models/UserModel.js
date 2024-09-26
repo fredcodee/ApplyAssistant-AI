@@ -8,6 +8,10 @@ const userSchema = new Schema({
     email:{
        type:String,
        unique:true 
+    },
+    githubId: {
+        default: null,
+        type:String
     }
 });
 

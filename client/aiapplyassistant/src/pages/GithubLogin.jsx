@@ -1,36 +1,48 @@
-import React ,{useEffect}from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Api from '../Api';
 
 const GithubLogin = () => {
-    const [error, setError] = useState('');
+    const [isOAuthCalled, setIsOAuthCalled] = useState(false);
     const navigate = useNavigate();
-    
-    useEffect(()=>{
+
+    useEffect(() => {
+        handleGitHubAuth();
+    }, [])
+
+    const handleGitHubAuth = async () => {
+        if (isOAuthCalled) return; // Prevent multiple calls
+        setIsOAuthCalled(true);
+        handleGitHubAuthcall();
+    };
+    const handleGitHubAuthcall = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
 
         if (code) {
             // Send code to backend
-            Api.post('api/auth/github', {code})
-            .then((res) => {
-                Cookies.set('access_token', res.data.token, { expires: 7 }); // Set for 7 days
-                setError('');
-                navigate('/dashboard');
-            })
-            .catch((error) => {
-                setError(error.response.data.message);
-            });
+            Api.post('api/auth/github', { code })
+                .then((res) => {
+                    if (res.status == 200) {
+                        localStorage.setItem('token', JSON.stringify(res.data.token));
+                        navigate('/dashboard');
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                    navigate('/signin');
+                });
         }
-    },[])
-  return (
-    <div>
-        {error && <p>{error}</p>}
-        <div>
-            <p>Redirecting...</p>
+    }
+
+
+    return (
+        <div className='container text-center'>
+            <div className='mt-8'>
+                <p>Redirecting...</p>
+            </div>
         </div>
-    </div>
-  )
+    )
 }
 
 export default GithubLogin

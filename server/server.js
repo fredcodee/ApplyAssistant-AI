@@ -12,11 +12,15 @@ import allowedOrigins from './configs/AllowedOriginUrls.js';
 connectToMongoDB()
 
 const app = express()
-app.use(cookieParser());
-app.use(json())
+// CORS configuration
+const corsOptions = {
+    origin: allowedOrigins,
+    credentials: true, // Allow cookies
+  };
 
-// enable CORS - Cross Origin Resource Sharing
-app.use(cors({origin: allowedOrigins, credentials: true }));
+app.use(cors(corsOptions));
+app.use(json())
+app.use(cookieParser());
 app.use('/api', appRoutes)
 
 app.listen(process.env.PORT,()=>{

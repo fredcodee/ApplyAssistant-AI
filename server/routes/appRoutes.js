@@ -6,7 +6,6 @@ const router = Router();
 
 router.get("/health", AppController.health)
 router.post("/login", AppController.login)
-router.get("/logout",authorization, AppController.logout)
 router.post("/register", AppController.register)
 router.post("/auth/google", AppController.googleAuth)
 router.get("/user",authorization, AppController.userDetails)

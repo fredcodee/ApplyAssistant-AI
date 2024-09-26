@@ -1,58 +1,61 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Api from '../Api';
-import Cookies from 'js-cookie';
+import { jwtDecode } from "jwt-decode"
 
 const AuthContext = createContext();
 
 export default AuthContext;
 
 export const AuthProvider = ({ children }) => {
-  const [authTokens, setAuthTokens] = useState(() => Cookies.get('access_token') || null);
-  const [user, setUser] = useState(() => Cookies.get('access_token') ? jwtDecode(Cookies.get('access_token')) : null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+    const [authTokens, setAuthTokens] = useState(() =>
+        localStorage.getItem('token')
+          ? JSON.parse(localStorage.getItem('token'))
+          : null
+      );
+      const [user, setUser] = useState(() =>
+        localStorage.getItem('token')
+          ? jwtDecode(localStorage.getItem('token'))
+          : null
+      );
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState('');
+      const history = useNavigate();
+
 
   const loginUser = async (email, password) => {
     try {
       const response = await Api.post('api/user/login', {
         email,
         password,
-      });
-
-      const data = response.data;
+      },
+    );
       if (response.status === 200) {
-        // Set authTokens in cookies
-        Cookies.set('access_token', data.token, { expires: 7 }); // Set for 7 days
-        setAuthTokens(data.token);
-        setError('');
-        navigate('/dashboard');
+            setAuthTokens(response.data.token);
+            localStorage.setItem('token', JSON.stringify(response.data.token));
+            setError('');
+            history('/dashboard');
       }
     } catch (error) {
       setError(error.response.data.message);
     }
   };
 
-  const handleGoogleAuth = async (credentials, accountType) => {
+  const handleGoogleAuth = async (credentials) => {
     try {
       const decodedCredentials = jwtDecode(credentials);
-      if (!decodedCredentials || !accountType) {
-        setError('Error, please make sure you choose an account type and try again');
-        return;
-      }
-
       const data = {
         email: decodedCredentials.email,
         sub: decodedCredentials.sub
       };
 
-      const response = await Api.post('api/auth/google', data);
+      const response = await Api.post('api/auth/google', data,);
       if (response.status === 200) {
-        Cookies.set('access_token', response.data.token, { expires: 7 });
-        setAuthTokens(response.data.token);
-        setError('');
-        navigate('/dashboard');
+            setAuthTokens(response.data.token);
+            localStorage.setItem('token', JSON.stringify(response.data.token));
+            setError('');
+            history('/dashboard');
+
       }
     } catch (error) {
       setError(error.response.data.message);
@@ -60,15 +63,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logoutUser = async () => {
-    // Clear cookies
-    Cookies.remove('access_token');
+    localStorage.removeItem('token');
     setAuthTokens(null);
-    setError('');
-    navigate('/login');
+    history('/signin');
   };
+
+
 
   const contextData = {
     error,
+    user,
     loginUser,
     logoutUser,
     handleGoogleAuth,
@@ -79,7 +83,7 @@ export const AuthProvider = ({ children }) => {
       setUser(jwtDecode(authTokens));
     }
     setLoading(false);
-  }, [authTokens]);
+  }, [authTokens, loading]);
 
   return (
     <AuthContext.Provider value={contextData}>

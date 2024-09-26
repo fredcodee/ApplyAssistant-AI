@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
   const authorization = async (req, res, next) => {
     try {
-        const token = req.cookies.access_token;
+        let token = req.header('Authorization')
         if (!token) {
             return res.status(403).send({ error: 'Token not found.' })
         }
