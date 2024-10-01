@@ -162,9 +162,12 @@ const uploadPdf = async (req, res) => {
             return res.status(400).send('Please upload a pdf file')
         }
 
-        const dataBuffer = req.file.buffer
+        const dataBuffer = await pdfParse(req.file.buffer)
+
+        const text = dataBuffer.text
         res.status(200).json({
             message: 'PDF parsed successfully',
+            text: text
         });
     }
     catch(error){
