@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       const decodedCredentials = jwtDecode(credentials);
       const data = {
         email: decodedCredentials.email,
-        sub: decodedCredentials.sub
+        googleId: decodedCredentials.sub
       };
 
       const response = await Api.post('api/auth/google', data,);

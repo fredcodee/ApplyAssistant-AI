@@ -3,6 +3,7 @@ import errorHandler from "../middlewares/ErrorHandler.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import fetch from "node-fetch"
+import { PDFDocument } from 'pdf-lib';
 
 
 const health = async (req, res) => {
@@ -39,7 +40,7 @@ const login = async (req, res) => {
         return res.status(200).json({token: token, message: "Logged in successfully " });
     }
     catch(error){
-        return errorHandler(error, res)
+        errorHandler.errorHandler(error, res)
     }
 }
 
@@ -64,7 +65,7 @@ const register = async (req, res) => {
         }
     }
     catch(error){
-        return errorHandler(error, res)
+        errorHandler.errorHandler(error, res)
     }
 }
 
@@ -117,6 +118,9 @@ const githubAuth = async (req, res) => {
                 },
             });
             const userData = await userResponse.json();
+            if (!userData.id || !userData.email) {
+                return res.status(401).json({ message: "Failed to login with github" });
+            }
             let user = await User.findOne({ email: userData.email, githubId: userData.id });
             if (!user) {
                 const newUser = new User({
@@ -144,12 +148,41 @@ const userDetails = async (req, res) => {
             id: req.userId, email: req.userEmail});
     }
     catch(error){
-        return errorHandler(error, res)
+        errorHandler.errorHandler(error, res)
+    }
+}
+
+const uploadPdf = async (req, res) => {
+    try{
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
+
+         //error handling if file is not pdf
+         if (!req.file.originalname.match(/\.(pdf)$/)) {
+            return res.status(400).send('Please upload a pdf file')
+        }
+
+        const pdfDoc = await PDFDocument.load(req.file.buffer);
+        
+        const pages = pdfDoc.getPages();
+        let pdfText = '';
+        
+        pages.forEach(page => {
+            pdfText += page.getTextContent();
+        });
+        res.status(200).json({
+            message: 'PDF parsed successfully',
+            text: pdfText
+        });
+    }
+    catch(error){
+        errorHandler.errorHandler(error, res)
     }
 }
 
 
 
 export{
-    health,login,register,userDetails,googleAuth, githubAuth
+    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf
 }
