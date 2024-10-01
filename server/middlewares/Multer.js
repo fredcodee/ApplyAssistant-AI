@@ -1,16 +1,11 @@
-import multer, { diskStorage, memoryStorage } from 'multer';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+const multer = require('multer'); 
+const path = require('path');
 
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
-// Save to destination
-const destinationDir = join(__dirname, '..', 'files');
+const destinationDir = path.join(__dirname, '..', 'files');
 
 // Set up multer storage
-const storage = memoryStorage({
+const storage = multer.memoryStorage({
     destination: function(req, file, cb) {
         cb(null, destinationDir); // Destination directory
     },
@@ -19,7 +14,7 @@ const storage = memoryStorage({
     }
 });
 
-// Initialize multer upload middleware
+
 const upload = multer({ storage });
 
-export default upload;
+module.exports = upload;

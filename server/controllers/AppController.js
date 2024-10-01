@@ -1,9 +1,11 @@
-import User from "../models/UserModel.js"
-import errorHandler from "../middlewares/ErrorHandler.js"
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-import fetch from "node-fetch"
-import { PDFDocument } from 'pdf-lib';
+const User  = require("../models/UserModel.js")
+const errorHandler = require("../middlewares/ErrorHandler");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const axios = require('axios');
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
+
 
 
 const health = async (req, res) => {
@@ -94,30 +96,27 @@ const githubAuth = async (req, res) => {
     try {
         const { code } = req.body;
         // Exchange code for access token
-        const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-            method: 'POST',
+        const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_CLIENT_SECRET,
+            code,
+        }, {
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({
-                client_id: process.env.GITHUB_CLIENT_ID,
-                client_secret: process.env.GITHUB_CLIENT_SECRET,
-                code,
-            }),
         });
 
-        const tokenData = await tokenResponse.json();
-        const accessToken = tokenData.access_token;
+        const accessToken = tokenResponse.data.access_token;
 
         if (accessToken) {
             // Get user data and save to db or get user details
-            const userResponse = await fetch('https://api.github.com/user', {
+            const userResponse = await axios.get('https://api.github.com/user', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                 },
             });
-            const userData = await userResponse.json();
+
+            const userData = userResponse.data;
             if (!userData.id || !userData.email) {
                 return res.status(401).json({ message: "Failed to login with github" });
             }
@@ -163,17 +162,9 @@ const uploadPdf = async (req, res) => {
             return res.status(400).send('Please upload a pdf file')
         }
 
-        const pdfDoc = await PDFDocument.load(req.file.buffer);
-        
-        const pages = pdfDoc.getPages();
-        let pdfText = '';
-        
-        pages.forEach(page => {
-            pdfText += page.getTextContent();
-        });
+        const dataBuffer = req.file.buffer
         res.status(200).json({
             message: 'PDF parsed successfully',
-            text: pdfText
         });
     }
     catch(error){
@@ -183,6 +174,6 @@ const uploadPdf = async (req, res) => {
 
 
 
-export{
+module.exports = {
     health,login,register,userDetails,googleAuth, githubAuth, uploadPdf
 }

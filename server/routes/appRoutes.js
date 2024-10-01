@@ -1,9 +1,8 @@
-import { Router } from 'express';
-import authorization from '../middlewares/Auth.js'
-import * as AppController from '../controllers/AppController.js'
-import upload from '../middlewares/Multer.js'
+const router = require('express').Router()
+const authorization = require('../middlewares/Auth')
+const AppController = require('../controllers/AppController')
+const upload = require('../middlewares/Multer')
 
-const router = Router();
 
 router.get("/health", AppController.health)
 router.post("/login", AppController.login)
@@ -14,5 +13,4 @@ router.post('/auth/github', AppController.githubAuth)
 router.post('/upload', authorization, upload.single('pdf'), AppController.uploadPdf)
 
 
-
-export default router
+module.exports= router

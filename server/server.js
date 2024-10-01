@@ -1,17 +1,17 @@
-import dotenv from 'dotenv'
-dotenv.config()
-import express, { json } from 'express';
-import cookieParser from "cookie-parser";
-import cors from 'cors';
-import appRoutes from './routes/appRoutes.js';
-import connectToMongoDB from './configs/Database.js';
-import allowedOrigins from './configs/AllowedOriginUrls.js';
+require('dotenv').config();
+const express = require('express');
+const cors =  require('cors')
+const cookieParser = require('cookie-parser')
+const connectToMongoDB = require('./configs/Database')
+const allowedOrigins = require('./configs/allowedOriginUrls')
+const appRoutes = require('./routes/appRoutes')
 
 
 //connect to db
 connectToMongoDB()
 
 const app = express()
+
 // CORS configuration
 const corsOptions = {
     origin: allowedOrigins,
@@ -19,7 +19,7 @@ const corsOptions = {
   };
 
 app.use(cors(corsOptions));
-app.use(json())
+app.use(express.json());
 app.use(cookieParser());
 app.use('/api', appRoutes)
 
@@ -27,4 +27,4 @@ app.listen(process.env.PORT,()=>{
     console.log("server is up on port: " + process.env.PORT)
 })
 
-export default app;
+module.exports = app;
