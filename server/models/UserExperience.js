@@ -9,6 +9,11 @@ const userExperienceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'UserResume'
     },
+    jobId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'JobDetails',
+        default: null
+    },
     company: {
         type: String,
         required: true
