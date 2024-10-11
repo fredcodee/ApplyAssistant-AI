@@ -5,6 +5,7 @@ import HomePage from './pages/Homepage'
 import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
 import GithubLogin from './pages/GithubLogin';
+import JobDetails from './pages/JobDetails';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/signin" element={<LoginPage />} />
           <Route path="/auth/github/callback" element={<GithubLogin />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/job" element={<PrivateRoute><JobDetails /></PrivateRoute>} />
         </Routes>
         </AuthProvider>
       </BrowserRouter>
