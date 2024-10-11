@@ -11,6 +11,6 @@ router.post("/auth/google", AppController.googleAuth)
 router.get("/user",authorization, AppController.userDetails)
 router.post('/auth/github', AppController.githubAuth)
 router.post('/upload', authorization, upload.single('pdf'), AppController.uploadPdf)
-
+router.get('/check-resume', authorization, AppController.checkResume)
 
 module.exports= router

@@ -1,4 +1,5 @@
 const User  = require("../models/UserModel.js")
+const UserResume = require("../models/UserResume.js")
 const errorHandler = require("../middlewares/ErrorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -175,8 +176,24 @@ const uploadPdf = async (req, res) => {
     }
 }
 
+//check if user has uploaded resume
+const checkResume = async (req, res) => {
+    try{
+        const getUserResume  = await UserResume.findOne({userId: req.userId})
+        if(getUserResume){
+            return res.status(200).json({message: "User has uploaded resume"})
+        }
+        else{
+            return res.status(400).json({message: "User has not uploaded resume"})
+        }
+    }
+    catch(error){
+        errorHandler.errorHandler(error, res)
+    }
+}
+
 
 
 module.exports = {
-    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf
+    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf, checkResume
 }
