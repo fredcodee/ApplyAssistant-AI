@@ -184,7 +184,7 @@ const checkResume = async (req, res) => {
             return res.status(200).json({message: "User has uploaded resume"})
         }
         else{
-            return res.status(400).json({message: "User has not uploaded resume"})
+            return res.status(401).json({message: "User has not uploaded resume"})
         }
     }
     catch(error){
