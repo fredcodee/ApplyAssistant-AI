@@ -192,8 +192,33 @@ const checkResume = async (req, res) => {
     }
 }
 
+//add job
+const addJob = async (req, res) => {
+    try{
+        const [companyName, companyWebsite, jobLink, jobTitle, jobDescription, jobRequirements, salary] = req.body
+
+        const newJob = new JobDetails({
+            companyName,
+            companyWebsite,
+            jobLink,
+            jobTitle,
+            jobDescription,
+            jobRequirements,
+            salary
+        })
+        await newJob.save()
+        //ai logic here
+        return res.status(200).json({
+            message: 'Job added successfully'
+        });
+    }
+    catch(error){
+        errorHandler.errorHandler(error, res)
+    }
+}
+
 
 
 module.exports = {
-    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf, checkResume
+    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf, checkResume, addJob
 }
