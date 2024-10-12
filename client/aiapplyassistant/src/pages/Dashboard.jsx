@@ -4,7 +4,6 @@ import Header from '@/components/Header'
 import Api from '../Api';
 import { Input } from "@/components/ui/input"
 import { Loader2 } from "lucide-react"
-import { Label } from '@/components/ui/label';
 
 
 const Dashboard = () => {

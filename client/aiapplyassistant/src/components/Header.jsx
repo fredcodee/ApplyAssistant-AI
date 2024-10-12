@@ -19,8 +19,8 @@ function Header() {
       </div>
       <div>
         <div>
-          <a href="/dashboard">
-          <Button variant="outline" >Job Hub</Button>
+          <a href="/add-job">
+          <Button variant="outline" >Add Job</Button>
           </a>
         </div>
 

@@ -8,6 +8,9 @@ const jobDetailsSchema = new mongoose.Schema({
     companyName: {
         type: String
     },
+    jobTitle: {
+        type: String
+    },
     jobDescription: {
         type: String
     },
