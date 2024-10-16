@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import GithubLogin from './pages/GithubLogin';
 import JobDetails from './pages/JobDetails';
 import AddJob from './pages/AddJob';
+import Index from './Resume/index';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/job" element={<PrivateRoute><JobDetails /></PrivateRoute>} />
           <Route path="/add-job" element={<PrivateRoute><AddJob /></PrivateRoute>} />
+          <Route path="/kits" element={<PrivateRoute><Index /></PrivateRoute>} />
         </Routes>
         </AuthProvider>
       </BrowserRouter>

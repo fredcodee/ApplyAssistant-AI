@@ -207,7 +207,7 @@ const addJob = async (req, res) => {
             salary
         })
         await newJob.save()
-        //ai logic here
+        //ai logic here (genereate tailored experinces, cv letter, message, followup, tech stack)
         return res.status(200).json({
             message: 'Job added successfully'
         });
