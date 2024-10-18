@@ -13,5 +13,6 @@ router.post('/auth/github', AppController.githubAuth)
 router.post('/upload', authorization, upload.single('pdf'), AppController.uploadPdf)
 router.get('/check-resume', authorization, AppController.checkResume)
 router.post('/add-job', authorization, AppController.addJob)
+router.get('/test-ai', AppController.testAi)
 
 module.exports= router

@@ -4,8 +4,8 @@ const errorHandler = require("../middlewares/ErrorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require('axios');
-const fs = require('fs');
 const pdfParse = require('pdf-parse');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 
 
@@ -166,6 +166,8 @@ const uploadPdf = async (req, res) => {
         const dataBuffer = await pdfParse(req.file.buffer)
 
         const text = dataBuffer.text
+        //ai to extract skills and experience and save to db
+
         res.status(200).json({
             message: 'PDF parsed successfully',
             text: text
@@ -218,7 +220,24 @@ const addJob = async (req, res) => {
 }
 
 
+const testAi = async (req, res) => {
+    try{
+        const genAI = new GoogleGenerativeAI(process.env.AI_GEMINI_API_KEY );
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = 'what the best books to read for finance`?'
+        const result = await model.generateContent(prompt);
+        return res.status(200).json({
+            message: 'ai generated successfully',
+            result: result.response.text()
+        });
+    }
+    catch(error){
+        errorHandler.errorHandler(error, res)
+    }
+}
+
+
 
 module.exports = {
-    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf, checkResume, addJob
+    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf, checkResume, addJob, testAi
 }
