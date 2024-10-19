@@ -1,5 +1,6 @@
-const User  = require("../models/UserModel.js")
+const User = require("../models/UserModel.js")
 const UserResume = require("../models/UserResume.js")
+const UserExperience = require("../models/UserExperience.js")
 const errorHandler = require("../middlewares/ErrorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -16,14 +17,14 @@ const health = async (req, res) => {
 
 //user auth
 const login = async (req, res) => {
-    try{
+    try {
         const { email, password } = req.body
         if (!email || !password) {
             return res.status(400).json({
                 title: 'bad request',
                 message: 'email and password are required'
             })
-        }   
+        }
         const user = await User.findOne({ email })
         if (!user) {
             return res.status(401).json({
@@ -37,19 +38,19 @@ const login = async (req, res) => {
                 title: 'unauthorized',
                 message: 'email or password is incorrect'
             })
-        }   
+        }
 
-        const token = jwt.sign({ id: user._id , email: user.email}, process.env.JWT_SECRET, { expiresIn: '7d' })
-        return res.status(200).json({token: token, message: "Logged in successfully " });
+        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' })
+        return res.status(200).json({ token: token, message: "Logged in successfully " });
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
 
 
 const register = async (req, res) => {
-    try{
+    try {
         try {
             const { email, password } = req.body
 
@@ -67,7 +68,7 @@ const register = async (req, res) => {
             errorHandler.errorHandler(error, res)
         }
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
@@ -75,9 +76,9 @@ const register = async (req, res) => {
 // google auth
 const googleAuth = async (req, res) => {
     try {
-        const {email, googleId} = req.body
-        let checkUserExists  = await User.findOne({email:email, googleId:googleId})
-        if(!checkUserExists){
+        const { email, googleId } = req.body
+        let checkUserExists = await User.findOne({ email: email, googleId: googleId })
+        if (!checkUserExists) {
             const user = new User({
                 email,
                 googleId
@@ -85,8 +86,8 @@ const googleAuth = async (req, res) => {
             await user.save()
             checkUserExists = user
         }
-        const token = jwt.sign({ id: checkUserExists._id , email: checkUserExists.email}, process.env.JWT_SECRET, { expiresIn: '7d' })
-        return res.status(200).json({ token: token, message: "Logged in successfully " });    
+        const token = jwt.sign({ id: checkUserExists._id, email: checkUserExists.email }, process.env.JWT_SECRET, { expiresIn: '7d' })
+        return res.status(200).json({ token: token, message: "Logged in successfully " });
     } catch (error) {
         errorHandler.errorHandler(error, res)
     }
@@ -130,8 +131,8 @@ const githubAuth = async (req, res) => {
                 await newUser.save();
                 user = newUser;
             }
-            const token = jwt.sign({ id: user._id , email: user.email}, process.env.JWT_SECRET, { expiresIn: '7d' })
-            return res.status(200).json({token: token, message: "Logged in successfully " });
+            const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' })
+            return res.status(200).json({ token: token, message: "Logged in successfully " });
         } else {
             return res.status(401).json({ message: "Failed to login with github" });
         }
@@ -143,60 +144,137 @@ const githubAuth = async (req, res) => {
 
 
 const userDetails = async (req, res) => {
-    try{
+    try {
         return res.status(200).json({
-            id: req.userId, email: req.userEmail});
+            id: req.userId, email: req.userEmail
+        });
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
 
 const uploadPdf = async (req, res) => {
-    try{
+    try {
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         }
 
-         //error handling if file is not pdf
-         if (!req.file.originalname.match(/\.(pdf)$/)) {
+        //error handling if file is not pdf
+        if (!req.file.originalname.match(/\.(pdf)$/)) {
             return res.status(400).send('Please upload a pdf file')
         }
 
         const dataBuffer = await pdfParse(req.file.buffer)
 
         const text = dataBuffer.text
-        //ai to extract skills and experience and save to db
+        let prompt = `CONTEXT: You are an expert at extracting data from texts .
+        -------
+        TASK: 
+        - You will receive a text from a user.
+        - Analyze the texts and extract these strictly follow this format
+        - Output should be in json format
+        - The json data should have the following format
+        -------
+        OUTPUT FORMAT: 
+        {
+            name:...
+            roleTitle:...
+            email:..
+            portfolioLink:...
+            githubProfile:...
+            bio:..
+            skills: eg [skill1, skill2, etc ..]
+            education:[
+                    {
+                    "degree": ...,
+                    "field": ...
+                    }
+            ]
+            experience: eg[
+                {position:...
+                companyName:..
+                companyDescription: ...
+                startyear:..
+                endyear:..
+                accomplishments:["accomplishment1", "accomplishment2", etc..]
+                },
+                {position:...
+                companyName:..
+                companyDescription: ...
+                startyear:..
+                endyear:..
+                accomplishments:["accomplishment1", "accomplishment2", etc..]
+                }, etc ... 
+            ]
+        }`
+
+
+        prompt = prompt + ` and this is the user input: `+text
+        const result = await AiGenerator(prompt)
+        
+       
+        //for some reason the output comes with ```json so we need to remove it and parse it to json
+        let cleanedPrompt = result.replace(/```json/g, '').replace(/```/g, '').trim();
+        cleanedPrompt =JSON.parse(cleanedPrompt)
+
+        const newResume = new UserResume({
+            userId: req.userId,
+            name: cleanedPrompt.name,
+            role: cleanedPrompt.roleTitle,
+            email: cleanedPrompt.email,
+            portfolio: cleanedPrompt.portfolioLink,
+            github: cleanedPrompt.githubProfile,
+            bio: cleanedPrompt.bio,
+            skills: cleanedPrompt.skills,
+            education: cleanedPrompt.education[0].degree + " " + cleanedPrompt.education[0].field,
+        })
+        await newResume.save()
+
+        if(newResume && cleanedPrompt.experience.length > 0){
+            for (const experience of cleanedPrompt.experience) {
+                const newExperience = new UserExperience({
+                    userId: req.userId,
+                    UserResumeId: newResume._id,
+                    company: experience.companyName,
+                    position: experience.position,
+                    description: experience.companyDescription,
+                    startDate: experience.startyear,
+                    endDate: experience.endyear,
+                    accomplishments: experience.accomplishments
+                })
+                await newExperience.save()
+            }
+        }
 
         res.status(200).json({
-            message: 'PDF parsed successfully',
-            text: text
+            message: 'PDF parsed successfully and saved to database',
         });
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
 
 //check if user has uploaded resume
 const checkResume = async (req, res) => {
-    try{
-        const getUserResume  = await UserResume.findOne({userId: req.userId})
-        if(getUserResume){
-            return res.status(200).json({message: "User has uploaded resume"})
+    try {
+        const getUserResume = await UserResume.findOne({ userId: req.userId })
+        if (getUserResume) {
+            return res.status(200).json({ message: "User has uploaded resume" })
         }
-        else{
-            return res.status(401).json({message: "User has not uploaded resume"})
+        else {
+            return res.status(401).json({ message: "User has not uploaded resume" })
         }
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
 
 //add job
 const addJob = async (req, res) => {
-    try{
+    try {
         const [companyName, companyWebsite, jobLink, jobTitle, jobDescription, jobRequirements, salary] = req.body
 
         const newJob = new JobDetails({
@@ -214,24 +292,98 @@ const addJob = async (req, res) => {
             message: 'Job added successfully'
         });
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
 
 
+async function AiGenerator(prompt) {
+    const genAI = new GoogleGenerativeAI(process.env.AI_GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+}
+
+
 const testAi = async (req, res) => {
-    try{
-        const genAI = new GoogleGenerativeAI(process.env.AI_GEMINI_API_KEY );
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const prompt = 'what the best books to read for finance`?'
-        const result = await model.generateContent(prompt);
-        return res.status(200).json({
-            message: 'ai generated successfully',
-            result: result.response.text()
-        });
+    try {
+        const prompt = ```json
+        {
+        "name": "WILFRED CHUKWU",
+        "roleTitle": "BACKEND DEVELOPER",
+        "email": "Wilfredchukwu1@gmail.com",
+        "portfolioLink": "https://thefredcode.com",
+        "githubProfile": "https://github.com/fredcodee",
+        "bio": "Backend developer with over 8 years of experience.",
+        "skills": [
+            "NodeJs",
+            "Django",
+            "ReactJs",
+            "Flask",
+            "MongoDb",
+            "Postgress",
+            "SQLAlchemy",
+            "HTML/CSS",
+            "Docker",
+            "Aws",
+            "Git"
+        ],
+        "education": [
+            {
+            "degree": "BS",
+            "field": "COMPUTER SCIENCE"
+            }
+        ],
+        "experience": [
+            {
+            "position": "SOFTWARE ENGINEER (REMOTE)",
+            "companyName": "INVIX",
+            "companyDescription": "Ai Start-up company focused on building infrastructure, optimization, and design.",
+            "startyear": "2022",
+            "endyear": "2024",
+            "accomplishments": [
+                "Refined Backend Development through Collaboration: Collaborated with senior developers to implement best practices and advanced techniques, enhancing backend efficiency. This contributed to faster feature delivery, strengthening INVIX’s market competitiveness.",
+                "Developed AI-Powered Construction Defect Detection App: Designed and implemented API and backend systems for an AI-driven application identifying defects in building construction. Focused on data storage, manipulation, and user management, leading to 95% accuracy in defect detection. This helped attract major clients and drove a 25% revenue increase.",
+                "Designed Scalable Database Architecture: Engineered and maintained MongoDB-based database architecture to optimize data storage and retrieval. Reduced downtime and errors by 35%, improving user experience and reinforcing INVIX’s reputation for high-performance solutions.",
+                "Collaborated in International Teams: Effectively worked with international teams across time zones, ensuring smooth communication and project alignment. This contributed to timely project completions and allowed INVIX to meet critical deadlines."
+            ]
+            },
+            {
+            "position": "SOFTWARE ENGINEER (REMOTE)",
+            "companyName": "TARGETHUNT",
+            "companyDescription": "Data extraction company",
+            "startyear": "2019",
+            "endyear": "2022",
+            "accomplishments": [
+                "Optimized Data Processing Efficiency: Designed and implemented efficient data processing algorithms, reducing memory usage and processing time. This allowed TargetHunt to scale operations without extra infrastructure costs, increasing data extraction capacity and driving a 20% boost in client acquisition and retention.",
+                "Developed Scalable API Services: Collaborated with developers to build reliable API services using Django Rest Framework, forming the core of our data extraction platform. This improved system reliability and minimized downtime.",
+                "Automated Web Scraping and Browser Operations: Led the development of browser automation with Selenium, integrating it into backend systems. This reduced manual effort, sped up data collection, and expanded data source variety, allowing TargetHunt to enter new markets and boost revenue streams."
+            ]
+            },
+            {
+            "position": "BACKEND DEVELOPER",
+            "companyName": "VINNTECH",
+            "companyDescription": "SAAS Company in the finance",
+            "startyear": "2017",
+            "endyear": "2019",
+            "accomplishments": [
+                "Refined Backend Code for Developer Efficiency: Maintained and refactored the backend codebase, creating a more organized structure that improved frontend developer workflow. This reduced time-to-market for new features, enabling VinnTech to adapt faster to market changes.",
+                "Integrated Secure Stripe Payment System: Collaborated on designing and implementing secure Stripe payment integration, resulting in a 25% rise in successful transactions and higher subscription renewals. This process reinforced VinnTech’s revenue model by ensuring consistent cash flow.",
+                "Delivered User-focused Solutions on Time: Implemented product enhancements based on user feedback, ensuring timely delivery without sacrificing quality. This increased user satisfaction, leading to a 20% rise in engagement and reduced churn."
+            ]
+            }
+        ]
+        }
+        ```
+        // convert to json
+        // Removing the ```json markers
+        const cleanedPrompt = prompt.replace(/```json/g, '').replace(/```/g, '').trim();
+        console.log(cleanedPrompt)
+        // const changed= JSON.parse(cleanedPrompt)
+        // console.log(changed)
     }
-    catch(error){
+    catch (error) {
         errorHandler.errorHandler(error, res)
     }
 }
@@ -239,5 +391,5 @@ const testAi = async (req, res) => {
 
 
 module.exports = {
-    health,login,register,userDetails,googleAuth, githubAuth, uploadPdf, checkResume, addJob, testAi
+    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, testAi
 }

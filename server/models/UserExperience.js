@@ -27,11 +27,11 @@ const userExperienceSchema = new mongoose.Schema({
     },
     accomplishments: [{ type: String }],
     startDate: {                
-        type: Date,
+        type: String,
         required: true
     },
     endDate: {
-        type: Date
+        type: String
     }
 });
 
