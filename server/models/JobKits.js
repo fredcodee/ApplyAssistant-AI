@@ -12,7 +12,7 @@ const jobKitsSchema = new mongoose.Schema({
     coverLetter: {  
         type: String
     },
-    linkdinMessage: {
+    message: {
         type: String
     },
     followUpMessage: {

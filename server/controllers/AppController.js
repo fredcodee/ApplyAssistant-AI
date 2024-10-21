@@ -1,12 +1,15 @@
 const User = require("../models/UserModel.js")
 const UserResume = require("../models/UserResume.js")
 const UserExperience = require("../models/UserExperience.js")
+const JobKits = require("../models/JobKits.js")
+const JobDetails = require("../models/JobDetails.js")
 const errorHandler = require("../middlewares/ErrorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require('axios');
 const pdfParse = require('pdf-parse');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const prompts = require('../controllers/prompts');
 
 
 
@@ -168,46 +171,7 @@ const uploadPdf = async (req, res) => {
         const dataBuffer = await pdfParse(req.file.buffer)
 
         const text = dataBuffer.text
-        let prompt = `CONTEXT: You are an expert at extracting data from texts .
-        -------
-        TASK: 
-        - You will receive a text from a user.
-        - Analyze the texts and extract these strictly follow this format
-        - Output should be in json format
-        - The json data should have the following format
-        -------
-        OUTPUT FORMAT: 
-        {
-            name:...
-            roleTitle:...
-            email:..
-            portfolioLink:...
-            githubProfile:...
-            bio:..
-            skills: eg [skill1, skill2, etc ..]
-            education:[
-                    {
-                    "degree": ...,
-                    "field": ...
-                    }
-            ]
-            experience: eg[
-                {position:...
-                companyName:..
-                companyDescription: ...
-                startyear:..
-                endyear:..
-                accomplishments:["accomplishment1", "accomplishment2", etc..]
-                },
-                {position:...
-                companyName:..
-                companyDescription: ...
-                startyear:..
-                endyear:..
-                accomplishments:["accomplishment1", "accomplishment2", etc..]
-                }, etc ... 
-            ]
-        }`
+        let prompt = prompts.promptForExtractingResume
 
 
         prompt = prompt + ` and this is the user input: `+text
@@ -215,8 +179,7 @@ const uploadPdf = async (req, res) => {
         
        
         //for some reason the output comes with ```json so we need to remove it and parse it to json
-        let cleanedPrompt = result.replace(/```json/g, '').replace(/```/g, '').trim();
-        cleanedPrompt =JSON.parse(cleanedPrompt)
+        let cleanedPrompt = await cleanAiResult(result)
 
         const newResume = new UserResume({
             userId: req.userId,
@@ -275,22 +238,80 @@ const checkResume = async (req, res) => {
 //add job
 const addJob = async (req, res) => {
     try {
-        const [companyName, companyWebsite, jobLink, jobTitle, jobDescription, jobRequirements, salary] = req.body
+        const {companyName, companyWebsite, jobLink, jobTitle, jobDescription, salary} = req.body
 
         const newJob = new JobDetails({
+            userId: req.userId,
             companyName,
             companyWebsite,
-            jobLink,
             jobTitle,
             jobDescription,
-            jobRequirements,
+            postUrl: jobLink,
             salary
         })
         await newJob.save()
-        //ai logic here (genereate tailored experinces, cv letter, message, followup, tech stack)
-        return res.status(200).json({
-            message: 'Job added successfully'
-        });
+        if (newJob) {
+            const userExperience = await UserExperience.find({ userId: req.userId, jobId:null })
+            const UserExperiences = userExperience.map((experience) => {
+                return `position: ${experience.position}
+                companyName: ${experience.company}
+                companyDescription: ${experience.description}
+                startyear: ${experience.startDate}
+                endyear: ${experience.endDate}
+                accomplishments: ${experience.accomplishments.map((acc) => acc).join('---')}
+                `
+            }).join('\n')
+
+            //ai to generate cv letter, message and followup
+            let promptForCvMessage = prompts.promptForCvMessage 
+            promptForCvMessage = promptForCvMessage + prompts.userInput(jobDescription, UserExperiences)
+            const cvMessage = await AiGenerator(promptForCvMessage)
+            const cleanPFCM = await cleanAiResult(cvMessage)
+
+
+            //ai to generate experiences
+            let promptForExperiences = prompts.promptForExperienceTailoring
+            promptForExperiences = promptForExperiences + prompts.userInput(jobDescription, UserExperiences)
+            const experiences = await AiGenerator(promptForExperiences)
+            const cleanPFE = await cleanAiResult(experiences)
+
+
+            //save ai generated cv letter, message and followup 
+            const newJobKits = new JobKits({
+                userId: req.userId,
+                jobId: newJob._id,
+                coverLetter: cleanPFCM.cv,
+                message: cleanPFCM.message,
+                followUpMessage: cleanPFCM.followup
+            })
+            await newJobKits.save()
+
+            //save ai generated experiences
+            if(newJobKits) {
+                for (const experience of cleanPFE) {
+                    const newExperience = new UserExperience({
+                        userId: req.userId,
+                        jobId: newJob._id,
+                        company: experience.companyName,
+                        position: experience.position,
+                        description: experience.companyDescription,
+                        startDate: experience.startyear,
+                        endDate: experience.endyear,
+                        accomplishments: experience.accomplishments
+                    })
+                    await newExperience.save()
+                }   
+            }    
+
+            return res.status(200).json({
+                message: 'Job added successfully and kits generated',
+                cv: cleanPFCM.cv,
+                dmMessage: cleanPFCM.message,
+                followup: cleanPFCM.followup,
+                experiences: cleanPFE
+            });
+
+        }
     }
     catch (error) {
         errorHandler.errorHandler(error, res)
@@ -303,6 +324,12 @@ async function AiGenerator(prompt) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     return result.response.text();
+}
+
+//for some reason the output comes with ```json so we need to remove it and parse it to json
+async function cleanAiResult(result) {
+    const cleanResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanResult);
 }
 
 

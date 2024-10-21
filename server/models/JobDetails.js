@@ -14,10 +14,6 @@ const jobDetailsSchema = new mongoose.Schema({
     jobDescription: {
         type: String
     },
-    jobRequirements: {
-        type: String
-    },
-    technologies: [{ type: String }],
     postUrl: {
         type: String
     },
