@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import Api from '../Api';
 import { Input } from "@/components/ui/input"
 import { Loader2 } from "lucide-react"
+import JobList from '@/components/JobList';
 
 
 const Dashboard = () => {
@@ -52,6 +53,7 @@ const Dashboard = () => {
           if (response.status == 200) {
             setSuccess("Resume uploaded successfully, you can now post jobs details and get started :)")
             setLoading(false)
+            checkUserResume()
           }
         })
     }
@@ -87,12 +89,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      {resume && !loading && (
-        <div className='container pt-4 text-center' style={{ margin: 'auto' }}>
-          <h3 className='text-2xl'>Your Resume</h3>
-        </div>
-      )}
-
       {!resume && !loading && (
         <div className='container pt-4 text-center' style={{ margin: 'auto' }} >
           <h3>You have no resume uploaded yet</h3>
@@ -121,6 +117,12 @@ const Dashboard = () => {
             </div>
         </div>
           )}
+
+      {resume && (
+        <div className='container pt-4 text-center' style={{ margin: 'auto' }}>
+            < JobList />
+        </div>
+      )}
     </div>
   )
 }

@@ -24,7 +24,7 @@ const jobDetailsSchema = new mongoose.Schema({
     companywebsite: {
         type: String
     },
-    progress: { type:String, default: "Pending" }, // applied, onGoing, interviewing, negotiating, accepted, rejected
+    progress: { type:String, default: "Pending" }, // Applied, OnGoing, Interviewing, Negotiating, Accepted, Rejected
     salary: { type:String }
 });
 

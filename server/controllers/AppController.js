@@ -333,82 +333,10 @@ async function cleanAiResult(result) {
 }
 
 
-const testAi = async (req, res) => {
+const getJobs = async (req, res) => {
     try {
-        const prompt = ```json
-        {
-        "name": "WILFRED CHUKWU",
-        "roleTitle": "BACKEND DEVELOPER",
-        "email": "Wilfredchukwu1@gmail.com",
-        "portfolioLink": "https://thefredcode.com",
-        "githubProfile": "https://github.com/fredcodee",
-        "bio": "Backend developer with over 8 years of experience.",
-        "skills": [
-            "NodeJs",
-            "Django",
-            "ReactJs",
-            "Flask",
-            "MongoDb",
-            "Postgress",
-            "SQLAlchemy",
-            "HTML/CSS",
-            "Docker",
-            "Aws",
-            "Git"
-        ],
-        "education": [
-            {
-            "degree": "BS",
-            "field": "COMPUTER SCIENCE"
-            }
-        ],
-        "experience": [
-            {
-            "position": "SOFTWARE ENGINEER (REMOTE)",
-            "companyName": "INVIX",
-            "companyDescription": "Ai Start-up company focused on building infrastructure, optimization, and design.",
-            "startyear": "2022",
-            "endyear": "2024",
-            "accomplishments": [
-                "Refined Backend Development through Collaboration: Collaborated with senior developers to implement best practices and advanced techniques, enhancing backend efficiency. This contributed to faster feature delivery, strengthening INVIX’s market competitiveness.",
-                "Developed AI-Powered Construction Defect Detection App: Designed and implemented API and backend systems for an AI-driven application identifying defects in building construction. Focused on data storage, manipulation, and user management, leading to 95% accuracy in defect detection. This helped attract major clients and drove a 25% revenue increase.",
-                "Designed Scalable Database Architecture: Engineered and maintained MongoDB-based database architecture to optimize data storage and retrieval. Reduced downtime and errors by 35%, improving user experience and reinforcing INVIX’s reputation for high-performance solutions.",
-                "Collaborated in International Teams: Effectively worked with international teams across time zones, ensuring smooth communication and project alignment. This contributed to timely project completions and allowed INVIX to meet critical deadlines."
-            ]
-            },
-            {
-            "position": "SOFTWARE ENGINEER (REMOTE)",
-            "companyName": "TARGETHUNT",
-            "companyDescription": "Data extraction company",
-            "startyear": "2019",
-            "endyear": "2022",
-            "accomplishments": [
-                "Optimized Data Processing Efficiency: Designed and implemented efficient data processing algorithms, reducing memory usage and processing time. This allowed TargetHunt to scale operations without extra infrastructure costs, increasing data extraction capacity and driving a 20% boost in client acquisition and retention.",
-                "Developed Scalable API Services: Collaborated with developers to build reliable API services using Django Rest Framework, forming the core of our data extraction platform. This improved system reliability and minimized downtime.",
-                "Automated Web Scraping and Browser Operations: Led the development of browser automation with Selenium, integrating it into backend systems. This reduced manual effort, sped up data collection, and expanded data source variety, allowing TargetHunt to enter new markets and boost revenue streams."
-            ]
-            },
-            {
-            "position": "BACKEND DEVELOPER",
-            "companyName": "VINNTECH",
-            "companyDescription": "SAAS Company in the finance",
-            "startyear": "2017",
-            "endyear": "2019",
-            "accomplishments": [
-                "Refined Backend Code for Developer Efficiency: Maintained and refactored the backend codebase, creating a more organized structure that improved frontend developer workflow. This reduced time-to-market for new features, enabling VinnTech to adapt faster to market changes.",
-                "Integrated Secure Stripe Payment System: Collaborated on designing and implementing secure Stripe payment integration, resulting in a 25% rise in successful transactions and higher subscription renewals. This process reinforced VinnTech’s revenue model by ensuring consistent cash flow.",
-                "Delivered User-focused Solutions on Time: Implemented product enhancements based on user feedback, ensuring timely delivery without sacrificing quality. This increased user satisfaction, leading to a 20% rise in engagement and reduced churn."
-            ]
-            }
-        ]
-        }
-        ```
-        // convert to json
-        // Removing the ```json markers
-        const cleanedPrompt = prompt.replace(/```json/g, '').replace(/```/g, '').trim();
-        console.log(cleanedPrompt)
-        // const changed= JSON.parse(cleanedPrompt)
-        // console.log(changed)
+        const jobs = await JobDetails.find({ userId: req.userId })
+        return res.status(200).json(jobs)
     }
     catch (error) {
         errorHandler.errorHandler(error, res)
@@ -417,6 +345,7 @@ const testAi = async (req, res) => {
 
 
 
+
 module.exports = {
-    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, testAi
+    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, getJobs
 }
