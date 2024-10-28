@@ -350,12 +350,11 @@ const getJobKits = async (req, res) => {
         //get resume data for this job
         const userResume = await UserResume.findOne({ userId: req.userId })
         const userExperience = await UserExperience.find({ userId: req.userId, jobId: jobId })
-        const jobkits = await JobKits.findOne({ userId: req.userId, jobId: jobId })
+        const jobkits = await JobKits.findOne({ userId: req.userId, jobId: jobId }).populate('jobId')
 
         //arrange json
         const arrangeResume =  {
-            firstName:userResume.name,
-            lastName:'',
+            name:userResume.name,
             jobTitle:userResume.role,
             githubLink:userResume.github,
             portfolioLink:userResume.portfolio,
@@ -378,18 +377,22 @@ const getJobKits = async (req, res) => {
                     education:userResume.education,
                 },
             ],
-            skills:[
+            skills:
                 userResume.skills.map((skill) => {
                     return {
-                        id:1,
                         name:skill
                     }
-                })
-            ]
+                }),
+            
+            companyName: jobkits.jobId.companyName,
+            role: jobkits.jobId.jobTitle,
+            cv: jobkits.coverLetter,
+            dmMessage: jobkits.message,
+            followup: jobkits.followUpMessage
         }
         //cv
 
-        return res.status(200).json({resume:arrangeResume, cv:jobkits.coverLetter, dmMessage:jobkits.message, followup:jobkits.followUpMessage})
+        return res.status(200).json(arrangeResume)
     }   
     catch (error) {
         errorHandler.errorHandler(error, res)

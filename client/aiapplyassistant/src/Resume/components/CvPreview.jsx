@@ -1,21 +1,23 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { ResumeInfoContext } from '@/context/ResumeInfoContext'
 
 const CvPreview = () => {
+  const {resumeInfo,setResumeInfo}=useContext(ResumeInfoContext)
   return (
     <div className='shadow-lg h-full p-14 border-t-[20px]'>
         <div className='float-right'>
-          <h2>Company Name</h2>
+          <h2>{resumeInfo?.companyName}</h2>
         </div>
         <div className='text-lg font-bold'>
-          <h2>Application for: Job Title</h2>
+          <h2>Application for: {resumeInfo?.role}</h2>
         </div>
         <div>
-          <p>Dear companyName team</p>
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur rem, eum maiores quasi similique unde? Voluptatibus ullam debitis facere nostrum quaerat est reiciendis commodi, enim saepe distinctio amet magni necessitatibus?</p>
+          <p>Dear {resumeInfo?.companyName} team</p>
+          <p>{resumeInfo?.cv}</p>
           <p className='pt-5'>
             Best regards,<br/>
-            your name <br/>
-            your email@gmail.com
+            {resumeInfo?.name}<br/>
+            {resumeInfo?.email}
           </p>
         </div>
     </div>
