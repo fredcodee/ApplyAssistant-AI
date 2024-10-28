@@ -52,15 +52,15 @@ step 2 -  the user will also provide their past experiences and accomplishments
 step 3- now this is your task and steps on how to generate the accomplishments (very important)
 -(very important)try to Use the key skills you took note of, at the start of the sentence of the accomplishments not compulsory but the word has to be used in the sentence expecially if its a programming language 
 -use the list the type of individual suitable and rewrite users accomplishment or make something similar sound experienced and tailor it 
--make up your own new accomplishment you think suitable for this job if accomplishments in each company is less then 4 only rule is that is shouldn't be more that 6
+-make up your own new accomplishment you think suitable for this job if accomplishments in each company experience is less then 4 only rule is that is shouldn't be more that 6
 
 
 step 4 - this is the only information you should provide to the user nothing else just this json format (very important)
 
 (VERY IMPORTANT * STRICTLY FOLLOW THIS RULES)
 *do not say or print anything else aside from the json output
-*do not try to I reduced the words in the accomplishments in the JSON file to make them more concise and impactful
-* strictly adhere to the specified output format
+*do not try to reduced the words in the accomplishments in the JSON file to make them more concise and impactful
+*strictly adhere to the specified output format
  
 -------
 OUTOUT FORMAT (as json):

@@ -10,7 +10,7 @@ function ResumePreview() {
     const {resumeInfo,setResumeInfo}=useContext(ResumeInfoContext)
 
   return (
-    <div className='shadow-lg h-full p-14 border-t-[20px]'
+    <div className=' h-full p-5 border-t-[20px]'
     style={{
         borderColor:resumeInfo?.themeColor
     }}>

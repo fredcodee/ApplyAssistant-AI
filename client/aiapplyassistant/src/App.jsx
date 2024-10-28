@@ -8,6 +8,7 @@ import GithubLogin from './pages/GithubLogin';
 import JobDetails from './pages/JobDetails';
 import AddJob from './pages/AddJob';
 import Index from './Resume/index';
+import ResumeView from './Resume/ResumeView';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/job" element={<PrivateRoute><JobDetails /></PrivateRoute>} />
           <Route path="/add-job" element={<PrivateRoute><AddJob /></PrivateRoute>} />
           <Route path="/kits/:id" element={<PrivateRoute><Index /></PrivateRoute>} />
+          <Route path="/resume/:id" element={<PrivateRoute><ResumeView /></PrivateRoute>} />
         </Routes>
         </AuthProvider>
       </BrowserRouter>
