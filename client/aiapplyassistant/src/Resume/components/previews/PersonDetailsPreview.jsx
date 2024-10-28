@@ -8,7 +8,7 @@ const PersonDetailsPreview = ({resumeInfo}) => {
             color:resumeInfo?.themeColor
         }}
         >
-            {resumeInfo?.firstName} {resumeInfo?.lastName}</h2>
+            {resumeInfo?.name}</h2>
         <h2 className='text-center text-md font-medium pb-2'
        >{resumeInfo?.jobTitle}</h2>
 

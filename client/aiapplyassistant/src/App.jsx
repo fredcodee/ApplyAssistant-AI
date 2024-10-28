@@ -21,7 +21,7 @@ function App() {
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/job" element={<PrivateRoute><JobDetails /></PrivateRoute>} />
           <Route path="/add-job" element={<PrivateRoute><AddJob /></PrivateRoute>} />
-          <Route path="/kits" element={<PrivateRoute><Index /></PrivateRoute>} />
+          <Route path="/kits/:id" element={<PrivateRoute><Index /></PrivateRoute>} />
         </Routes>
         </AuthProvider>
       </BrowserRouter>

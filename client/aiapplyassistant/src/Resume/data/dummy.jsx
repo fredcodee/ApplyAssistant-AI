@@ -1,6 +1,5 @@
 export default{
-    firstName:'James',
-    lastName:'Carter',
+    name:'James',
     jobTitle:'Backend developer',
     address:'525 N tryon Street, NC 28117',
     phone:'(123)-456-7890',
@@ -40,22 +39,12 @@ export default{
     education:[
         {
             id:1,
-            universityName:'Western Illinois University',
-            startDate:'Aug 2018',
-            endDate:'Dec:2019',
-            degree:'Master',
-            major:'Computer Science',
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud'
-        },
+            education:'Western Illinois University',
+         },
         {
             id:2,
-            universityName:'Western Illinois University',
-            startDate:'Aug 2018',
-            endDate:'Dec:2019',
-            degree:'Master',
-            major:'Computer Science',
-            description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud'
-        }
+            education:'Western Illinois University',
+           }
     ],
     skills:[
         {

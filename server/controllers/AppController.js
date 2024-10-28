@@ -344,8 +344,58 @@ const getJobs = async (req, res) => {
 }
 
 
+const getJobKits = async (req, res) => {
+    try {
+        const {jobId} = req.body
+        //get resume data for this job
+        const userResume = await UserResume.findOne({ userId: req.userId })
+        const userExperience = await UserExperience.find({ userId: req.userId, jobId: jobId })
+
+        //arrange json
+        const arrangeResume =  {
+            firstName:userResume.name,
+            lastName:'',
+            jobTitle:userResume.role,
+            githubLink:userResume.github,
+            portfolioLink:userResume.portfolio,
+            email:userResume.email,
+            themeColor:"#ff6666",
+            summary:userResume.bio,
+            experience: userExperience.map((experience, index) => ({
+                id: index + 1,
+                title: experience.position,
+                companyName: experience.company,
+                type: 'Remote',
+                startDate: experience.startDate,
+                endDate: experience.endDate,
+                currentlyWorking: false,
+                workSummary: experience.accomplishments.map((summary) => summary)
+            })),
+            education:[
+                {
+                    id:1,
+                    education:userResume.education,
+                },
+            ],
+            skills:[
+                userResume.skills.map((skill) => {
+                    return {
+                        id:1,
+                        name:skill
+                    }
+                })
+            ]
+        }
+        return res.status(200).json({arrangeResume})
+    }   
+    catch (error) {
+        errorHandler.errorHandler(error, res)
+    }
+}
+
+
 
 
 module.exports = {
-    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, getJobs
+    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, getJobs, getJobKits
 }

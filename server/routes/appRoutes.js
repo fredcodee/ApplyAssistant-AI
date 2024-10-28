@@ -14,4 +14,5 @@ router.post('/upload', authorization, upload.single('pdf'), AppController.upload
 router.get('/check-resume', authorization, AppController.checkResume)
 router.post('/add-job', authorization, AppController.addJob)
 router.get('/jobs', authorization, AppController.getJobs)
+router.post('/jobkits', authorization, AppController.getJobKits)
 module.exports= router

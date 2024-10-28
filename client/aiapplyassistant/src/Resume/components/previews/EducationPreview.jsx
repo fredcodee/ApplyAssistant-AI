@@ -18,9 +18,8 @@ const EducationPreview = ({resumeInfo}) => {
                 style={{
                     color:resumeInfo?.themeColor
                 }}
-            >{education.universityName}</h2>
-            <h2 className='text-xs flex justify-between'>{education?.degree} in {education?.major}
-            </h2>
+            >{education.education}</h2>
+           
         </div>
     ))}
 

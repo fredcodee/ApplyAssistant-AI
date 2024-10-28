@@ -94,7 +94,8 @@ const JobList = () => {
                                 </TableCell>
 
                                 <TableCell>
-                                    <Button variant="outline" >View kits</Button>
+                                    <Button variant="outline" >
+                                        <a href={'/kits/' + job._id}>View kits</a></Button>
                                 </TableCell>
                             </TableRow>
                         ))}
