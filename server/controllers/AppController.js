@@ -350,6 +350,7 @@ const getJobKits = async (req, res) => {
         //get resume data for this job
         const userResume = await UserResume.findOne({ userId: req.userId })
         const userExperience = await UserExperience.find({ userId: req.userId, jobId: jobId })
+        const jobkits = await JobKits.findOne({ userId: req.userId, jobId: jobId })
 
         //arrange json
         const arrangeResume =  {
@@ -386,7 +387,9 @@ const getJobKits = async (req, res) => {
                 })
             ]
         }
-        return res.status(200).json({arrangeResume})
+        //cv
+
+        return res.status(200).json({resume:arrangeResume, cv:jobkits.coverLetter, dmMessage:jobkits.message, followup:jobkits.followUpMessage})
     }   
     catch (error) {
         errorHandler.errorHandler(error, res)
