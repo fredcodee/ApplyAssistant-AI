@@ -15,4 +15,6 @@ router.get('/check-resume', authorization, AppController.checkResume)
 router.post('/add-job', authorization, AppController.addJob)
 router.get('/jobs', authorization, AppController.getJobs)
 router.post('/jobkits', authorization, AppController.getJobKits)
+router.post('/edit/job/progress', authorization, AppController.editJobProgress)
+router.post('/delete/job', authorization, AppController.deleteJob)
 module.exports= router

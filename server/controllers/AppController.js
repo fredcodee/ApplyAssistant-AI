@@ -390,10 +390,35 @@ const getJobKits = async (req, res) => {
             dmMessage: jobkits.message,
             followup: jobkits.followUpMessage
         }
-        //cv
-
         return res.status(200).json(arrangeResume)
     }   
+    catch (error) {
+        errorHandler.errorHandler(error, res)
+    }
+}
+
+const editJobProgress = async (req, res) => {
+    try {
+        const { jobId, progress } = req.body
+        const job = await JobDetails.findOne({ _id: jobId })
+        job.progress = progress
+        await job.save()
+        return res.status(200).json({ message: 'Job progress updated successfully' })
+    }
+    catch (error) {
+        errorHandler.errorHandler(error, res)
+    }
+}
+
+
+const deleteJob = async (req, res) => {
+    try {
+        const { jobId } = req.body
+        await JobKits.findOneAndDelete({ userId: req.userId, jobId: jobId })
+        await UserExperience.deleteMany({ userId: req.userId, jobId: jobId });
+        JobDetails.findOneAndDelete({ _id: jobId })
+        return res.status(200).json({ message: 'Job deleted successfully' })
+    }
     catch (error) {
         errorHandler.errorHandler(error, res)
     }
@@ -403,5 +428,5 @@ const getJobKits = async (req, res) => {
 
 
 module.exports = {
-    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, getJobs, getJobKits
+    health, login, register, userDetails, googleAuth, githubAuth, uploadPdf, checkResume, addJob, getJobs, getJobKits, editJobProgress, deleteJob
 }
