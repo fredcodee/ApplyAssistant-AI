@@ -416,7 +416,7 @@ const deleteJob = async (req, res) => {
         const { jobId } = req.body
         await JobKits.findOneAndDelete({ userId: req.userId, jobId: jobId })
         await UserExperience.deleteMany({ userId: req.userId, jobId: jobId });
-        JobDetails.findOneAndDelete({ _id: jobId })
+        await JobDetails.findOneAndDelete({ _id: jobId })
         return res.status(200).json({ message: 'Job deleted successfully' })
     }
     catch (error) {
