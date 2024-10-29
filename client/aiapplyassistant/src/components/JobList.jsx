@@ -7,6 +7,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import Api from '../Api';
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -37,6 +44,27 @@ const JobList = () => {
             setError(error)
         }
     }
+
+    const editProgress = async (id, progress) => {
+        try {
+            await Api.post(`api/edit/job/progress`,{
+                jobId: id,
+                progress
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token.replace(/"/g, '')}`
+                }
+            })
+                .then((res) => {
+                    getJobs()
+                })
+                .catch((err) => {
+                    setError(err)
+                })
+        } catch (error) {
+            setError(error)
+        }
+    }
     return (
         <div>
             {error && (
@@ -53,7 +81,7 @@ const JobList = () => {
 
             {jobs.length > 0 && (
                 <Table>
-                    <TableCaption>A list of your Jobs ({jobs.length}).</TableCaption>
+                    <TableCaption>Your Jobs ({jobs.length}).</TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[100px]">Company</TableHead>
@@ -83,14 +111,24 @@ const JobList = () => {
                                             ? 'orange'
                                             : job.progress === 'Applied'
                                                 ? 'blue'
-                                            : job.progress === 'Negotiating'
-                                                ? 'purple'
-                                            : job.progress === 'Rejected'
-                                                ? 'red'
-                                                : 'green',
+                                                : job.progress === 'Negotiating'
+                                                    ? 'purple'
+                                                    : job.progress === 'Rejected'
+                                                        ? 'red'
+                                                        : 'green',
                                     }}
                                 >
-                                    {job.progress}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger>{job.progress}</DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem onClick={() => editProgress(job._id, 'Applied')}>Applied</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => editProgress(job._id, 'OnGoing')}>OnGoing</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => editProgress(job._id, 'Interviewing')}>Interviewing</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => editProgress(job._id, 'Negotiating')}>Negotiating</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => editProgress(job._id, 'Rejected')}>Rejected</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => editProgress(job._id, 'Accepted')}>Accepted</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
 
                                 <TableCell>
