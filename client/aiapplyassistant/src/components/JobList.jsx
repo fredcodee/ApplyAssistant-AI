@@ -169,7 +169,7 @@ const JobList = () => {
                                 >
                                     <DropdownMenu>
                                         <DropdownMenuTrigger>{job.progress}</DropdownMenuTrigger>
-                                        <DropdownMenuContent>
+                                        <DropdownMenuContent style={{ width: '200px', backgroundColor: 'white' , color: 'black'}}>
                                             <DropdownMenuItem onClick={() => editProgress(job._id, 'Applied')}>Applied</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => editProgress(job._id, 'OnGoing')}>OnGoing</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => editProgress(job._id, 'Interviewing')}>Interviewing</DropdownMenuItem>
