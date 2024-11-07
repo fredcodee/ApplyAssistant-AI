@@ -146,7 +146,7 @@ const JobList = () => {
                         {jobs.map((job, index) => (
                             <TableRow key={index}>
                                 <TableCell className="font-medium">{job.companyName}</TableCell>
-                                <TableCell>{job.companywebsite || "n/a"}</TableCell>
+                                <TableCell>{job.companyWebsite || "n/a"}</TableCell>
                                 <TableCell>{job.jobTitle}</TableCell>
                                 <TableCell>{new Date(job.date).toDateString()}</TableCell>
                                 <TableCell>

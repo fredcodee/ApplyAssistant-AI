@@ -175,7 +175,7 @@ const uploadPdf = async (req, res) => {
 
 
         prompt = prompt + ` and this is the user input: `+text
-        const result = await AiGenerator(prompt)
+        const result = await AiGenerator(prompt, false)
         
        
         //for some reason the output comes with ```json so we need to remove it and parse it to json
@@ -265,14 +265,14 @@ const addJob = async (req, res) => {
             //ai to generate cv letter, message and followup
             let promptForCvMessage = prompts.promptForCvMessage 
             promptForCvMessage = promptForCvMessage + prompts.userInput(jobDescription, UserExperiences)
-            const cvMessage = await AiGenerator(promptForCvMessage)
+            const cvMessage = await AiGenerator(promptForCvMessage, newJob._id)
             const cleanPFCM = await cleanAiResult(cvMessage)
 
 
             //ai to generate experiences
             let promptForExperiences = prompts.promptForExperienceTailoring
             promptForExperiences = promptForExperiences + prompts.userInput(jobDescription, UserExperiences)
-            const experiences = await AiGenerator(promptForExperiences)
+            const experiences = await AiGenerator(promptForExperiences, newJob._id)
             const cleanPFE = await cleanAiResult(experiences)
 
 
@@ -319,11 +319,20 @@ const addJob = async (req, res) => {
 }
 
 
-async function AiGenerator(prompt) {
+async function AiGenerator(prompt, jobId) {
+    try{
     const genAI = new GoogleGenerativeAI(process.env.AI_GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     return result.response.text();
+    }
+    catch(error) {
+        if (jobId) {
+            await JobKits.findOneAndDelete({ userId: req.userId, jobId: jobId })
+            await UserExperience.deleteMany({ userId: req.userId, jobId: jobId });
+            await JobDetails.findOneAndDelete({ _id: jobId })
+        }
+    }
 }
 
 //for some reason the output comes with ```json so we need to remove it and parse it to json
